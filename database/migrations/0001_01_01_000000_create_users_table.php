@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            // Platform Governance
+            $table->boolean('is_admin')->default(false); // Global Admin
+            $table->boolean('is_banned')->default(false);
+            $table->integer('reputation')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });
