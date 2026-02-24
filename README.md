@@ -76,3 +76,13 @@ EasyColoc est une application web monolithique conçue pour simplifier la gestio
 ## 🎯 Objectif du Projet
 
 - L'objectif est de fournir une solution robuste pour éviter les conflits financiers en colocation grâce à une automatisation des calculs et une transparence des échanges.
+
+## 📄 Licence
+
+Projet pédagogique.
+
+
+
+- Author : Ait Youss Oussama
+- Formation : YouCode - UM6P Youssoufia
+
