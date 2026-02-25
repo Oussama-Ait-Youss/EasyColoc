@@ -6,6 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Payments;
+use App\Models\Expenses;
+use App\Models\Colocation;
 
 class User extends Authenticatable
 {
@@ -25,7 +28,24 @@ class User extends Authenticatable
         'is_banned',    
         'reputation',
     ];
+    public function colocations() {
+        return $this->belongsToMany(Colocation::class, 'memberships')
+                    ->withPivot('role', 'joined_at', 'left_at')
+                    ->withTimestamps();
+    }
+    public function sentPayments() {
+        return $this->hasMany(Payments::class, 'from_user_id');
+    }
 
+    public function receivedPayments() {
+        return $this->hasMany(Payments::class, 'to_user_id');
+    }
+    public function expenses() {
+        return $this->hasMany(Expenses::class, 'user_id');
+    }
+
+
+    
     /**
      * The attributes that should be hidden for serialization.
      *
