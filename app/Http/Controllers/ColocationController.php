@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Colocation;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreColocationRequest;
 
 class ColocationController extends Controller
 {
@@ -12,7 +13,9 @@ class ColocationController extends Controller
      */
     public function index()
     {
-        //
+        $colocations = Colocation::all();
+        return view('colocation.index',compact('colocations'));
+
     }
 
     /**
@@ -20,15 +23,21 @@ class ColocationController extends Controller
      */
     public function create()
     {
-        //
+        return view('colocation.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreColocationRequest $request)
     {
         //
+        Colocation::create([
+            'name' => $request->name,
+           
+        ]);
+        // return view('colocation.index');
+        return redirect()->route('colocation.index')->with('success','create colocation avec success');
     }
 
     /**
@@ -42,17 +51,21 @@ class ColocationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Colocation $colocation)
+    public function edit(string $id)
     {
-        //
+        $colocations = Colocation::findOrFail($id);
+        return view('colocations.edit',compact('colocations'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Colocation $colocation)
+    public function update(StoreColocationRequest $request, Colocation $colocation)
     {
-        //
+        Colocation::updated([
+            'name' => $request->name,
+        ]);
+        return redirect()->route('colocation.index')->with('success','colocation modifier avec success');
     }
 
     /**
