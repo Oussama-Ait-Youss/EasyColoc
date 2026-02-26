@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Expenses;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreExpenseRequest;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class ExpensesController extends Controller
 {
@@ -33,16 +35,12 @@ class ExpensesController extends Controller
     {
         //
         Expenses::create([
-            'title' => $request->title,
-            
-            'amount' => $request->amount,
-            
-            'category_id' => $request->category_id,
-            
-            'date' => $request->date,
-            
-            'colocation_id' => $request->coloction_id,
-           
+            'title'         => $request->title,
+            'amount'        => $request->amount,
+            'category_id'   => $request->category_id,
+            'date'          => $request->date,
+            'colocation_id' => $request->colocation_id,
+            'user_id'       => Auth::id(),
         ]);
         // return view('colocation.index');
         return redirect()->route('expenses.index')->with('success','ajouter expenses avec success');
@@ -71,16 +69,12 @@ class ExpensesController extends Controller
      */
     public function update(StoreExpenseRequest $request, Expenses $expenses)
     {
-        Expenses::update([
+        $expenses->update([
             'title' => $request->title,
             
             'amount' => $request->amount,
-            
-            'category_id' => $request->category_id,
-            
+
             'date' => $request->date,
-            
-            'colocation_id' => $request->colocation_id,
         ]);
         return redirect()->route('expenses.index')->with('success','expenses modifier avec success');
     }
@@ -90,6 +84,7 @@ class ExpensesController extends Controller
      */
     public function destroy(Expenses $expenses)
     {
-        //
+        $expenses->delete();
+        return redirect()->route('expenses.index')->with('success','supprimere avec success');
     }
 }

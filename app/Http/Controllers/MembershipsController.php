@@ -3,77 +3,58 @@
 namespace App\Http\Controllers;
 
 use App\Models\Memberships;
+use App\Models\Invitations;
+use App\Models\Colocation;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreMembershipsRequest;
+use Illuminate\Support\Facades\Auth;
 
 class MembershipsController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche la liste des membres de la colocation actuelle de l'utilisateur.
      */
     public function index()
     {
-        //
+        // On récupère la colocation active de l'utilisateur connecté
+        $colocation = Colocation::all()
+            ->wherePivot('left_at', null)
+            ->first();
+
+        $members = $colocation ? $colocation->memberships()->with('user')->get() : [];
+
+        return view('memberships.index', compact('members', 'colocation'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('memberships.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+   
     public function store(StoreMembershipsRequest $request)
     {
+        $invitation = Invitations::where('token', $request->token)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
         Memberships::create([
-            'token' => $request->token,
-            
-            'colocation_id' => $request->colocation_id,
+            'user_id'       => Auth::id(),
+            'colocation_id' => $invitation->colocation_id,
+            'role'          => 'member', 
+            'joined_at'     => now(),
         ]);
-        return redirect()->route('memberships.index')->with('success','create Memberships avec success');
+
+        $invitation->update(['status' => 'accepted']);
+
+        return redirect()->route('colocation.index')
+            ->with('success', 'Félicitations ! Vous avez rejoint la colocation.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Memberships $memberships)
+  
+    public function destroy(Memberships $membership)
     {
-        //
-    }
+        
+        $membership->update([
+            'left_at' => now()
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $memberships = Memberships::findOrFail($id);
-        return view('memberships.edit',compact('memberships'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(StoreMembershipsRequest $request, Memberships $memberships)
-    {
-        // Memberships::update([
-
-        //     'token' => $request->token,
-            
-        //     'colocation_id' => $request->colocation_id,
-        // ]);
-        // return redirect()->route('memberships.index')->with('success','update avec success');
-
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Memberships $memberships)
-    {
-        //
+        return redirect()->route('memberships.index')
+            ->with('success', 'Le membre a été retiré de la colocation avec succès.');
     }
 }
