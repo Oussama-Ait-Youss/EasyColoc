@@ -39,5 +39,11 @@ class Colocation extends Model
     public function payments() {
         return $this->hasMany(Payments::class);
     }
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'memberships')
+            ->withPivot('role', 'joined_at', 'left_at', 'reputation')
+            ->withTimestamps();
+    }
     
 }

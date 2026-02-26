@@ -8,6 +8,7 @@ use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\InvitationsController;
 use App\Http\Controllers\MembershipsController;
 use App\Http\Controllers\PaymentsController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,7 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/colocations/{colocation}', [ColocationController::class, 'update'])->name('colocation.update');
     Route::delete('/colocations/{colocation}', [ColocationController::class, 'destroy'])->name('colocation.destroy');
 
-    // --- Categories ---
+    // --- Categories ---   
     Route::get('/categories', [CategoriesController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [CategoriesController::class, 'create'])->name('categories.create');
     Route::post('/categories', [CategoriesController::class, 'store'])->name('categories.store');
@@ -51,6 +52,7 @@ Route::middleware('auth')->group(function () {
 
     // --- Invitations ---
     Route::get('/invitations', [InvitationsController::class, 'index'])->name('invitations.index');
+    Route::get('/invitations/join', [InvitationsController::class, 'join'])->name('invitations.join');
     Route::post('/invitations', [InvitationsController::class, 'store'])->name('invitations.store');
     Route::delete('/invitations/{invitation}', [InvitationsController::class, 'destroy'])->name('invitations.destroy');
 
@@ -58,6 +60,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/members', [MembershipsController::class, 'index'])->name('memberships.index');
     Route::post('/members/join', [MembershipsController::class, 'store'])->name('memberships.store');
     Route::delete('/members/{membership}', [MembershipsController::class, 'destroy'])->name('memberships.destroy');
+    // Remplace ton ancienne route /dashboard par celle-ci :
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
     // --- Paiements 
     Route::get('/payments', [PaymentsController::class, 'index'])->name('payments.index');

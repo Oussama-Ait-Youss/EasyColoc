@@ -80,4 +80,8 @@ class InvitationsController extends Controller
         $invitations->delete();
         return redirect()->route('invitations.index')->with('success','supprimere avec  succes');
     }
+    public function join()
+{
+    return view('invitations.join'); // Crée cette vue simple avec un champ "Token"
+}
 }

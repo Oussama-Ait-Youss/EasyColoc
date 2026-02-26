@@ -2,16 +2,26 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Colocation;
+use App\Models\Categories;
+use App\Models\Expenses;
 
-class ExpensesSeeder extends Seeder
+class ExpenseSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
+        $colocation = Colocation::with(['users', 'categories'])->first();
+
+        if ($colocation && $colocation->users->isNotEmpty() && $colocation->categories->isNotEmpty()) {
+            
+            for ($i = 0; $i < 15; $i++) {
+                Expenses::factory()->create([
+                    'colocation_id' => $colocation->id,
+                    'user_id'       => $colocation->users->random()->id,
+                    'category_id'   => $colocation->categories->random()->id,
+                ]);
+            }
+        }
     }
 }

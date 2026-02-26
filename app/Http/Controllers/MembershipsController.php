@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Memberships;
+use App\Models\User;
 use App\Models\Invitations;
 use App\Models\Colocation;
 use Illuminate\Http\Request;
@@ -15,16 +16,20 @@ class MembershipsController extends Controller
      * Affiche la liste des membres de la colocation actuelle de l'utilisateur.
      */
     public function index()
-    {
-        // On récupère la colocation active de l'utilisateur connecté
-        $colocation = Colocation::all()
-            ->wherePivot('left_at', null)
-            ->first();
-
-        $members = $colocation ? $colocation->memberships()->with('user')->get() : [];
-
-        return view('memberships.index', compact('members', 'colocation'));
+{
+$colocation = Auth::user()->activeColocation();
+    if (!$colocation) {
+        return redirect()->route('colocation.create')
+            ->with('error', 'Vous devez appartenir à une colocation pour voir les membres.');
     }
+
+
+    $members = $colocation->users()
+        ->wherePivot('left_at', null)
+        ->get();
+
+    return view('memberships.index', compact('members', 'colocation'));
+}
 
    
     public function store(StoreMembershipsRequest $request)

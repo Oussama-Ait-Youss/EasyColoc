@@ -14,15 +14,24 @@ class PaymentsController extends Controller
      * Affiche l'historique des remboursements de la colocation.
      */
     public function index()
-    {
-        $colocationId = User::activeColocation()->id;
-        $payments = Payments::where('colocation_id', $colocationId)
-            ->with(['fromUser', 'toUser'])
-            ->latest()
-            ->get();
+{
+    // On récupère l'utilisateur connecté d'abord via Auth::user()
+    $user = Auth::user();
+    $colocation = $user->activeColocation();
 
-        return view('payments.index', compact('payments'));
+    // Toujours vérifier si la colocation existe pour éviter le crash "property id on null"
+    if (!$colocation) {
+        return redirect()->route('colocation.create')
+            ->with('error', 'Vous devez appartenir à une colocation.');
     }
+
+    $payments = Payments::where('colocation_id', $colocation->id)
+        ->with(['fromUser', 'toUser'])
+        ->latest()
+        ->get();
+
+    return view('payments.index', compact('payments'));
+}
 
     public function create()
     {
