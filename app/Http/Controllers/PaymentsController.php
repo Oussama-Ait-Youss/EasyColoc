@@ -3,83 +3,67 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payments;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\StorePaymentRequest;
-
-
+use Illuminate\Support\Facades\Auth;
 
 class PaymentsController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche l'historique des remboursements de la colocation.
      */
     public function index()
     {
-        $payments = Payments::all();
-        return view('payments.index',compact('payments'));
+        $colocationId = User::activeColocation()->id;
+        $payments = Payments::where('colocation_id', $colocationId)
+            ->with(['fromUser', 'toUser'])
+            ->latest()
+            ->get();
+
+        return view('payments.index', compact('payments'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('payments.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+   
     public function store(StorePaymentRequest $request)
     {
-        Payments::created([
-            'amount' => $request->amount,
-
-            'from_user_id' => $request->from_user_id,
-
+        
+        Payments::create([
+            'amount'        => $request->amount,
+            'from_user_id'  => $request->from_user_id,
+            'to_user_id'    => Auth::id(), 
             'colocation_id' => $request->colocation_id,
+            'paid_at'       => now(),
         ]);
-        return redirect()->route('payments.index')->with('success','payment avec success');
+
+        return redirect()->route('payments.index')->with('success', 'Le remboursement a été enregistré.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Payments $payments)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
-    {   
-        $payments = Payments::findOrFail($id);
-        return view('payment.edit',compact('payments'));
+    { 
+        $payment = Payments::findOrFail($id);
+        return view('payments.edit', compact('payment'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(StorePaymentRequest $request, Payments $payments)
-
+    
+    public function update(StorePaymentRequest $request, Payments $payment)
     {
-        Payments::updated([
-            'amount' => $request->amount,
-
-            'from_user_id' => $request->from_user_is,
-
-            'colocation_id' => $request->colocation_id,
+        $payment->update([
+            'amount'        => $request->amount,
+            'from_user_id'  => $request->from_user_id,
         ]);
-        return redirect()->route('payments.index')->with('success','payment modifier avec success');
+
+        return redirect()->route('payments.index')->with('success', 'Paiement mis à jour avec succès.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Payments $payments)
+    public function destroy(Payments $payment)
     {
-        //
+        $payment->delete();
+        return redirect()->route('payments.index')->with('success', 'Paiement supprimé.');
     }
 }

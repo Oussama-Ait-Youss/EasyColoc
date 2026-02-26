@@ -43,6 +43,12 @@ class User extends Authenticatable
     public function expenses() {
         return $this->hasMany(Expenses::class, 'user_id');
     }
+    public function activeColocation()
+    {
+    return $this->colocations()
+        ->wherePivot('left_at', null)
+        ->first(); 
+    }
 
 
     

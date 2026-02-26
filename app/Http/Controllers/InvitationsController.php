@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Invitations;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreInvitationsRequest;
+use Illuminate\Support\Str; 
+use Illuminate\Support\Facades\Auth;
 
 class InvitationsController extends Controller
 {
@@ -13,7 +15,8 @@ class InvitationsController extends Controller
      */
     public function index()
     {
-        //
+        $invitations = Invitations::all();
+        return view('invitations.index', compact('invitations'));
     }
 
     /**
@@ -31,8 +34,10 @@ class InvitationsController extends Controller
     {
         Invitations::create([
             'email' => $request->email,
-            
             'colocation_id' => $request->colocation_id,
+            'token' => Str::random(32),
+            'user_id' => Auth::id(), 
+            'status' => 'pending',  
         ]);
         return redirect()->route('invitation.index')->with('success','create invitation avec success');
     }
@@ -59,10 +64,9 @@ class InvitationsController extends Controller
      */
     public function update(StoreInvitationsRequest $request, Invitations $invitations)
     {
-        Invitations::updated(  [
+        $invitations->update(  [
              'email' => $request->email,
             
-            'colocation_id' => $request->colocation_id,
         ]);
         return redirect()->route('colocation.index')->with('success','invitations modifier avec success');
     }
@@ -73,5 +77,7 @@ class InvitationsController extends Controller
     public function destroy(Invitations $invitations)
     {
         //
+        $invitations->delete();
+        return redirect()->route('invitations.index')->with('success','supprimere avec  succes');
     }
 }
