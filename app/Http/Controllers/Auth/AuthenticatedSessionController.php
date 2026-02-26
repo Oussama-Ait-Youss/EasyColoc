@@ -16,7 +16,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        $token = request('token') ?? session('invitation_token');
+        return view('auth.login', compact('token'));
     }
 
     /**
@@ -27,6 +28,13 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // determine token from session or request
+        $token = $request->session()->pull('invitation_token') ?: $request->token;
+        if ($token) {
+            // still keep it in session until processed by join
+            return redirect()->route('invitations.join', ['token' => $token]);
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

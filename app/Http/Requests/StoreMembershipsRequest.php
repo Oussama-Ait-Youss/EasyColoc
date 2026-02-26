@@ -11,7 +11,8 @@ class StoreMembershipsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        // any logged‑in user may attempt to redeem an invitation token
+        return auth()->check();
     }
 
     /**
@@ -23,8 +24,7 @@ class StoreMembershipsRequest extends FormRequest
     {
         return [
             'token' => 'required|string|exists:invitations,token',
-            
-            'colocation_id' => 'required|exists:colocations,id',
+            // colocation_id is derived from the invitation on the server side
         ];
     }
 }

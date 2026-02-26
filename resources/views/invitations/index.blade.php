@@ -13,6 +13,8 @@
         </div>
     </div>
 
+    {{-- Only the owner of the current active colocation may send invitations --}}
+    @if(optional(auth()->user()->activeColocation()->pivot)->role === 'owner')
     <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30">
             <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400">Nouvelle invitation</h3>
@@ -35,6 +37,7 @@
             @enderror
         </form>
     </div>
+    @endif
 
     <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
         <table class="w-full text-left border-collapse">
@@ -62,7 +65,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-5 text-center text-gray-400 font-mono text-xs">
-                            {{ $invitation->expires_at->format('Y-m-d') }}
+                            {{ $invitation->expires_at }}
                         </td>
                         <td class="px-6 py-5 text-right">
                             <form action="{{ route('invitations.destroy', $invitation) }}" method="POST" class="inline">
