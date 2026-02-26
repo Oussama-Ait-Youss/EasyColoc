@@ -12,15 +12,23 @@ class ColocationController extends Controller
 {
    
     public function index()
-    {
-        $colocations = Colocation::all();
-        return view('colocation.index',compact('colocations'));
+{
+    // On utilise la relation définie dans ton modèle User
+    // first() assure que l'on récupère UN SEUL objet, pas une collection
+    $colocation = auth()->user()->activeColocation();
 
+    // Si l'utilisateur n'a pas de colocation, on le redirige vers la création
+    if (!$colocation) {
+        return redirect()->route('colocation.create')
+            ->with('info', 'Vous devez d\'abord créer ou rejoindre une colocation.');
     }
+
+    return view('colocations.index', compact('colocation'));
+}
 
     public function create()
     {
-        return view('colocation.create');
+        return view('colocations.create');
     }
 
    
@@ -28,6 +36,7 @@ class ColocationController extends Controller
     {
         $colocation = Colocation::create([
             'name' => $request->name,
+            'invite_token' => Str::random(32),
            
         ]);
         $colocation->memberships()->create([
@@ -56,15 +65,16 @@ class ColocationController extends Controller
     {
         $colocation->update([
             'name' => $request->name,
+            
         ]);
-        return redirect()->route('colocation.index')->with('success','colocation modifier avec success');
+        return redirect()->route('colocations.index')->with('success','colocation modifier avec success');
     }
 
     
     public function destroy(Colocation $colocation)
     {
         $colocation->delete();
-        return redirect()->route('colocation.index')->with('success', 'colocation supprimée avec success');
+        return redirect()->route('colocations.index')->with('success', 'colocation supprimée avec success');
 
     }
 }

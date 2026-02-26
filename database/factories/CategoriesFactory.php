@@ -4,20 +4,16 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Categories>
- */
 class CategoriesFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            // On pioche dans une liste de catégories communes pour une coloc
+            'name' => $this->faker->randomElement([
+                'Loyer', 'Courses', 'Électricité', 'Internet', 
+                'Eau', 'Assurance', 'Produits ménagers', 'Loisirs'
+            ]),
         ];
     }
 }

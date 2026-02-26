@@ -2,16 +2,29 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Colocation;
+use App\Models\Categories;
 
-class CategoriesSeeder extends Seeder
+class CategorySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
+        $colocation = Colocation::first();
+
+        if ($colocation) {
+            $defaultCategories = ['Loyer', 'Courses', 'Électricité', 'Internet'];
+
+            foreach ($defaultCategories as $name) {
+                Categories::create([
+                    'name' => $name,
+                    'colocation_id' => $colocation->id
+                ]);
+            }
+
+            Categories::factory(2)->create([
+                'colocation_id' => $colocation->id
+            ]);
+        }
     }
 }
