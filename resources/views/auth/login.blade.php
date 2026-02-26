@@ -5,6 +5,13 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
+        @if(isset($token) && $token)
+            <input type="hidden" name="token" value="{{ $token }}">
+            <div class="mb-4 text-sm text-gray-600">
+                Vous vous connectez avec une invitation&nbsp;! Après, vous pourrez rejoindre la colocation.
+            </div>
+        @endif
+
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />

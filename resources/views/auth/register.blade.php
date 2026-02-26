@@ -2,6 +2,14 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
+        @if(isset($token) && $token)
+            <input type="hidden" name="token" value="{{ $token }}">
+            <div class="mb-4 text-sm text-gray-600">
+                Vous vous inscrivez avec une invitation&nbsp;! Après l’enregistrement
+                vous serez automatiquement ajouté(e) à la colocation.
+            </div>
+        @endif
+
         <!-- Name -->
         <div>
             <x-input-label for="name" :value="__('Name')" />
@@ -40,7 +48,7 @@
         </div>
 
         <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login', isset($token) ? ['token' => $token] : []) }}">
                 {{ __('Already registered?') }}
             </a>
 

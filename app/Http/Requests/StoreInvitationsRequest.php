@@ -11,7 +11,15 @@ class StoreInvitationsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        // only the owner of the active colocation can send invitations
+        $user = $this->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        $colocation = $user->activeColocation();
+        return $colocation && $colocation->pivot->role === 'owner';
     }
 
     /**
@@ -23,8 +31,8 @@ class StoreInvitationsRequest extends FormRequest
     {
         return [
             'email' => 'required|email|max:255',
-            
-            'colocation_id' => 'required|exists:colocations,id',
+            // colocation_id is determined server‑side from the authenticated user,
+            // we don't expect it from the form anymore.
         ];
     }
 }

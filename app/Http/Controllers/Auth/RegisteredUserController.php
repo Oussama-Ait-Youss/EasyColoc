@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\Invitations;
+use App\Models\Memberships;
 
 class RegisteredUserController extends Controller
 {
@@ -19,7 +21,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        // if a token is already stored in the session, include it in the view
+        $token = request('token') ?? session('invitation_token');
+        return view('auth.register', compact('token'));
     }
 
     /**
@@ -34,6 +38,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'token' => ['nullable', 'string'],
         ]);
 
         $user = User::create([
@@ -46,6 +51,29 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        // determine token either from request (hidden input) or session
+        $token = $request->filled('token') ? $request->token : $request->session()->pull('invitation_token');
+
+        if ($token) {
+            $invitation = Invitations::where('token', $token)
+                ->where('status', 'pending')
+                ->first();
+
+            if ($invitation) {
+                Memberships::create([
+                    'user_id' => $user->id,
+                    'colocation_id' => $invitation->colocation_id,
+                    'role' => 'member',
+                    'joined_at' => now(),
+                ]);
+
+                $invitation->update(['status' => 'accepted']);
+
+                return redirect()->route('colocation.index')
+                    ->with('success', 'Inscription réussie ! Vous avez rejoint la colocation.');
+            }
+        }
 
         return redirect(route('dashboard', absolute: false));
     }
