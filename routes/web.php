@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/categories/{category}', [CategoriesController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoriesController::class, 'destroy'])->name('categories.destroy');
 
-    // --- Depenses (Expenses
+    // --- Expenses
     Route::get('/expenses', [ExpensesController::class, 'index'])->name('expenses.index');
     Route::get('/expenses/create', [ExpensesController::class, 'create'])->name('expenses.create');
     Route::post('/expenses', [ExpensesController::class, 'store'])->name('expenses.store');

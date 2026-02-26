@@ -17,7 +17,7 @@ class ExpensesController extends Controller
     {
         //
         $expenses = Expenses::all();
-        return view('colocation.index',compact('expenses'));
+        return view('expenses.index',compact('expenses'));
     }
 
     /**
