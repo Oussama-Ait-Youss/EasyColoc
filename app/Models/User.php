@@ -45,7 +45,6 @@ class User extends Authenticatable
     }
     public function activeColocation()
     {
-        // ensure we only return a colocation where the membership has not been left
         return $this->colocations()
             ->whereNull('memberships.left_at')
             ->first();

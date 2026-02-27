@@ -23,7 +23,6 @@ class Colocation extends Model
         return $this->hasMany(Memberships::class);
     }
 
-    // Invitations liées à cette colocation
     public function invitations() {
         return $this->hasMany(Invitations::class);
     }
