@@ -10,16 +10,12 @@ use Illuminate\Support\Facades\Auth;
 
 class PaymentsController extends Controller
 {
-    /**
-     * Affiche l'historique des remboursements de la colocation.
-     */
+    
     public function index()
 {
-    // On récupère l'utilisateur connecté d'abord via Auth::user()
     $user = Auth::user();
     $colocation = $user->activeColocation();
 
-    // Toujours vérifier si la colocation existe pour éviter le crash "property id on null"
     if (!$colocation) {
         return redirect()->route('colocation.create')
             ->with('error', 'Vous devez appartenir à une colocation.');

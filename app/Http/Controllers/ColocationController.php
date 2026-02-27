@@ -13,11 +13,9 @@ class ColocationController extends Controller
    
     public function index()
 {
-    // On utilise la relation définie dans ton modèle User
-    // first() assure que l'on récupère UN SEUL objet, pas une collection
+  
     $colocation = auth()->user()->activeColocation();
 
-    // Si l'utilisateur n'a pas de colocation, on le redirige vers la création
     if (!$colocation) {
         return redirect()->route('colocation.create')
             ->with('info', 'Vous devez d\'abord créer ou rejoindre une colocation.');
