@@ -17,6 +17,7 @@ class Memberships extends Model
     'joined',
     'is_banned',
     'reputation',
+    'left_at',
 ];
     public function user()
     {

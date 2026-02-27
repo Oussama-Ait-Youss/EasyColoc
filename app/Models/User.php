@@ -30,7 +30,7 @@ class User extends Authenticatable
     ];
     public function colocations() {
         return $this->belongsToMany(Colocation::class, 'memberships')
-                    ->withPivot('role', 'joined_at', 'left_at')
+                    ->withPivot('id','role', 'joined_at', 'left_at')
                     ->withTimestamps();
     }
     public function sentPayments() {
@@ -45,9 +45,10 @@ class User extends Authenticatable
     }
     public function activeColocation()
     {
-    return $this->colocations()
-        ->wherePivot('left_at', null)
-        ->first(); 
+        // ensure we only return a colocation where the membership has not been left
+        return $this->colocations()
+            ->whereNull('memberships.left_at')
+            ->first();
     }
 
 

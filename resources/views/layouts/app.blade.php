@@ -36,14 +36,17 @@
                 </a>
             </nav>
 
-            <div class="flex items-center pl-6">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors">
-                        Déconnexion
-                    </button>
-                </form>
-            </div>
+            <div class="flex items-center pl-6 space-x-6">
+    <a href="{{ route('profile.show') }}" class="text-xs font-bold uppercase tracking-widest {{ request()->routeIs('profile.*') ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-900' }} transition-colors">
+        Mon Profil
+    </a>
+    <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors">
+            Déconnexion
+        </button>
+    </form>
+</div>
         </div>
     </header>
 
@@ -64,6 +67,8 @@
 
             <div class="max-w-6xl mx-auto">
                 @yield('content')
+                {{-- support rendering slot when using <x-app-layout> component --}}
+                {{ $slot ?? '' }}
             </div>
         </div>
 

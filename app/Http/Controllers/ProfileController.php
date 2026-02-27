@@ -16,8 +16,14 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $colocation = $user->activeColocation();
+        $role = $colocation ? $colocation->pivot->role : null;
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'colocation' => $colocation,
+            'role' => $role,
         ]);
     }
 

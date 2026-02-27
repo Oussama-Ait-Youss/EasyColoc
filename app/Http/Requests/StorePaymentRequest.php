@@ -11,7 +11,31 @@ class StorePaymentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        $user = auth()->user();
+        if (! $user) {
+            return false;
+        }
+
+        $colocationId = $this->input('colocation_id');
+        $fromId = $this->input('from_user_id');
+
+        if (! $colocationId || ! $fromId) {
+            return false;
+        }
+
+        // user must be part of the provided colocation
+        if (! $user->colocations()->whereNull('memberships.left_at')->where('colocations.id', $colocationId)->exists()) {
+            return false;
+        }
+
+        // the payer should also belong to the same colocation
+        $fromUser = \App\Models\User::find($fromId);
+        if (! $fromUser || ! $fromUser->colocations()->whereNull('memberships.left_at')->where('colocations.id', $colocationId)->exists()) {
+            return false;
+        }
+
+        // current user will be treated as recipient so no further check
+        return true;
     }
 
     /**
