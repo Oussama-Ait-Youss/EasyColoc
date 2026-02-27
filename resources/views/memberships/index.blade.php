@@ -53,6 +53,7 @@
                     </div>
                 </div>
 
+                {{-- owner can revoke others --}}
                 @if(auth()->user()->id !== $member->id && auth()->user()->activeColocation()->pivot->role === 'owner')
                     <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-50 text-right">
                         <form action="{{ route('memberships.destroy', $member->pivot->id ?? $member->id) }}" method="POST" class="inline">
@@ -62,6 +63,21 @@
                                     class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-300 hover:text-red-500 transition-colors" 
                                     onclick="return confirm('Confirmer la révocation des accès pour ce membre ?')">
                                 Révoquer l'accès
+                            </button>
+                        </form>
+                    </div>
+                @endif
+
+                {{-- member can leave themselves --}}
+                @if(auth()->user()->id === $member->id && $member->pivot->role === 'member')
+                    <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-50 text-right">
+                        <form action="{{ route('memberships.destroy', $member->pivot->id) }}" method="POST" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" 
+                                    class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-300 hover:text-red-500 transition-colors" 
+                                    onclick="return confirm('Êtes-vous sûr de vouloir quitter la colocation ?')">
+                                Quitter
                             </button>
                         </form>
                     </div>

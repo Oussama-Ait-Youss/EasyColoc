@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreExpenseRequest extends FormRequest
 {
@@ -11,7 +12,20 @@ class StoreExpenseRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        $user = Auth::user();
+
+        if (! $user) {
+            return false;
+        }
+
+        $colocationId = $this->input('colocation_id');
+
+        if (! $colocationId) {
+            return false;
+        }
+
+        // allow if the authenticated user has an active membership in the provided colocation
+        return $user->colocations()->whereNull('memberships.left_at')->where('colocations.id', $colocationId)->exists();
     }
 
     /**

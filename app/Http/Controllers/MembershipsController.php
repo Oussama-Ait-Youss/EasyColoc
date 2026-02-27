@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class MembershipsController extends Controller
 {
-    /**
-     * Affiche la liste des membres de la colocation actuelle de l'utilisateur.
-     */
+    
     public function index()
 {
 $colocation = Auth::user()->activeColocation();
@@ -50,16 +48,43 @@ $colocation = Auth::user()->activeColocation();
         return redirect()->route('colocation.index')
             ->with('success', 'Félicitations ! Vous avez rejoint la colocation.');
     }
+    public function leave($colocationId)
+{
+    $user = auth()->user();
+    
+    
+    $user->colocations()->updateExistingPivot($colocationId, [
+        'left_at' => now()
+    ]);
+
+    return redirect()->route('colocation.create')
+        ->with('success', 'Vous avez quitté la colocation avec succès.');
+}
 
   
     public function destroy(Memberships $membership)
     {
+        $user = Auth::user();
+
         
+        if ($membership->user_id !== $user->id && $user->activeColocation()->pivot->role !== 'owner') {
+            abort(403);
+        }
+
+        if ($membership->role === 'owner' && $membership->user_id === $user->id) {
+            return redirect()->route('memberships.index')
+                ->with('error', 'Le propriétaire ne peut pas quitter la colocation. Supprimez-la ou transférez la propriété.');
+        }
+
         $membership->update([
             'left_at' => now()
         ]);
 
+        $message = $membership->user_id === $user->id
+            ? 'Vous avez quitté la colocation avec succès.'
+            : 'Le membre a été retiré de la colocation avec succès.';
+
         return redirect()->route('memberships.index')
-            ->with('success', 'Le membre a été retiré de la colocation avec succès.');
+            ->with('success', $message);
     }
 }

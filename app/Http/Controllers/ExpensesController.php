@@ -36,6 +36,30 @@ class ExpensesController extends Controller
 
     // 3. Ici, on est sûr que $colocation n'est pas NULL
     $categories = Categories::where('colocation_id', $colocation->id)->get();
+
+    // If there are no categories yet, create a set of sensible defaults
+    if ($categories->isEmpty()) {
+        $defaultCategories = [
+            'Rent' => 'Monthly rent payments',
+            'Utilities' => 'Electricity, water, gas bills',
+            'Groceries' => 'Food and household items',
+            'Internet' => 'Internet and cable bills',
+            'Cleaning Supplies' => 'Cleaning products and tools',
+            'Maintenance' => 'Repairs and maintenance',
+            'Entertainment' => 'Shared entertainment expenses',
+            'Transportation' => 'Shared transportation costs'
+        ];
+
+        foreach (array_keys($defaultCategories) as $name) {
+            Categories::firstOrCreate([
+                'colocation_id' => $colocation->id,
+                'name' => $name,
+            ]);
+        }
+
+        // reload categories after creating defaults
+        $categories = Categories::where('colocation_id', $colocation->id)->get();
+    }
     
     return view('expenses.create', compact('categories'));
 }

@@ -30,7 +30,9 @@ class InvitationMail extends Mailable
                     ->view('emails.invitation')
                     ->with([
                         'invitation' => $this->invitation,
-                        'joinUrl' => url('/invitations/join?token='.$this->invitation->token),
+                        // send recipients straight to registration (with token)
+                        // so they can create an account and be auto-joined
+                        'joinUrl' => route('register', ['token' => $this->invitation->token]),
                     ]);
     }
 }

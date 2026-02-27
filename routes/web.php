@@ -9,6 +9,7 @@ use App\Http\Controllers\InvitationsController;
 use App\Http\Controllers\MembershipsController;
 use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\DashboardController;
+// use App\Http\Controllers\MembershipsController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,7 +26,11 @@ Route::middleware('auth')->group(function () {
 
     // ======================================================================================
 
+    Route::get('/profile', function () {
+    return view('profile.show');
     
+})->middleware(['auth'])->name('profile.show');
+    Route::delete('/memberships/leave/{colocation}', [MembershipsController::class, 'leave'])->name('memberships.leave');
     // --- Colocations ---
     Route::get('/colocations', [ColocationController::class, 'index'])->name('colocation.index');
     Route::get('/colocations/create', [ColocationController::class, 'create'])->name('colocation.create');
