@@ -33,7 +33,7 @@
             </thead>
             <tbody class="divide-y divide-gray-50 text-sm">
                 @forelse($expenses as $expense)
-                    <tr class="group hover:bg-gray-50/30 transition-colors">
+                    <tr class="group hover:bg-gray-50/30">
                         <td class="px-6 py-5 font-semibold text-gray-800">
                             {{ $expense->title }}
                         </td>
@@ -57,17 +57,29 @@
                         <td class="px-6 py-5 text-gray-400 font-medium text-xs">
                             {{ \Carbon\Carbon::parse($expense->date)->format('Y-m-d') }}
                         </td>
-                        <td class="px-6 py-5 text-right space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <a href="{{ route('expenses.edit', $expense) }}" class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 hover:text-emerald-700">
-                                Rectifier
+                        <td class="px-6 py-5 text-right space-x-3 opacity-100  transition-opacity">
+                            <a href="{{ route('expenses.edit', $expense->id) }}" class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 ">
+                                Modifier
                             </a>
-                            <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-[10px] font-bold uppercase tracking-widest text-red-400 hover:text-red-600" onclick="return confirm('Confirmer la suppression du ticket ?')">
-                                    Supprimer
-                                </button>
-                            </form>
+
+                            @if(auth()->id() !== $expense->user_id)
+                                <form action="{{ route('expenses.pay', $expense->id) }}" method="POST" class="inline mx-2">
+                                    @csrf
+                                    <button type="submit" class="text-[10px] font-bold uppercase tracking-widest text-emerald-500 hover:text-emerald-700" onclick="return confirm('Confirmer le paiement de votre part pour cette dépense ?')">
+                                        Marquer payé
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if(auth()->id() == $expense->user_id || (auth()->user() && auth()->user()->is_admin))
+                                <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-[10px] font-bold uppercase tracking-widest text-red-600" onclick="return confirm('Confirmer la suppression du ticket ?')">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                 @empty

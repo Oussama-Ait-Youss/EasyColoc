@@ -22,4 +22,10 @@ class Expenses extends Model
 
     public function payer() { return $this->belongsTo(User::class, 'user_id'); }
     public function category() { return $this->belongsTo(Categories::class); }
+
+    // Alias for compatibility with views/controllers that expect `user` relation
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

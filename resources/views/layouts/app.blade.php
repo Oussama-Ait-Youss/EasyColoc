@@ -34,6 +34,12 @@
                 <a href="{{ route('memberships.index') }}" class="flex items-center px-6 text-xs font-semibold uppercase tracking-wider border-r border-gray-100 hover:bg-gray-50 {{ request()->routeIs('memberships.*') ? 'text-emerald-600 bg-emerald-50/30' : 'text-gray-400' }}">
                     <span class="mr-2 text-gray-300 italic">Current</span> 04. Membres
                 </a>
+                {{-- Dans ton nav --}}
+                @if(auth()->user()->is_admin)
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center px-6 text-xs font-semibold uppercase tracking-wider border-r border-gray-100 hover:bg-gray-50 {{ request()->routeIs('admin.*') ? 'text-red-600 bg-red-50/30' : 'text-gray-400' }}">
+                        <span class="mr-2 text-red-500 font-bold">!</span> Administration
+                    </a>
+                @endif
             </nav>
 
             <div class="flex items-center pl-6 space-x-6">
