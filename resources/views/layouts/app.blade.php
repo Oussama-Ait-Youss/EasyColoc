@@ -32,9 +32,9 @@
                     <span class="mr-2">03.</span> Paiements
                 </a>
                 <a href="{{ route('memberships.index') }}" class="flex items-center px-6 text-xs font-semibold uppercase tracking-wider border-r border-gray-100 hover:bg-gray-50 {{ request()->routeIs('memberships.*') ? 'text-emerald-600 bg-emerald-50/30' : 'text-gray-400' }}">
-                    <span class="mr-2 text-gray-300 italic">Current</span> 04. Membres
+                    <span class="mr-2">04.</span> Membres
                 </a>
-                {{-- Dans ton nav --}}
+                
                 @if(auth()->user()->is_admin)
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center px-6 text-xs font-semibold uppercase tracking-wider border-r border-gray-100 hover:bg-gray-50 {{ request()->routeIs('admin.*') ? 'text-red-600 bg-red-50/30' : 'text-gray-400' }}">
                         <span class="mr-2 text-red-500 font-bold">!</span> Administration
@@ -43,16 +43,16 @@
             </nav>
 
             <div class="flex items-center pl-6 space-x-6">
-    <a href="{{ route('profile.show') }}" class="text-xs font-bold uppercase tracking-widest {{ request()->routeIs('profile.*') ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-900' }} transition-colors">
-        Mon Profil
-    </a>
-    <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors">
-            Déconnexion
-        </button>
-    </form>
-</div>
+                <a href="{{ route('profile.show') }}" class="text-xs font-bold uppercase tracking-widest {{ request()->routeIs('profile.*') ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-900' }} transition-colors">
+                    Mon Profil
+                </a>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors">
+                        Déconnexion
+                    </button>
+                </form>
+            </div>
         </div>
     </header>
 
@@ -61,23 +61,27 @@
     </div>
 
     <main class="flex-1 flex overflow-hidden">
-        
         <div class="flex-1 overflow-y-auto p-8 lg:p-12">
             
-            @if(session('success'))
-                <div class="max-w-4xl mx-auto mb-8 flex items-center p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm font-medium">
-                    <span class="mr-3 bg-emerald-500 text-white rounded-full p-1 leading-none">✓</span>
-                    {{ session('success') }}
-                </div>
-            @endif
-
             <div class="max-w-6xl mx-auto">
+                @if(session()->has('success'))
+                    <div class="flex items-center p-4 bg-emerald-50 border border-emerald-100 rounded-lg text-emerald-800 text-[10px] font-bold uppercase tracking-widest mb-8 shadow-sm">
+                        <span class="mr-3 bg-emerald-500 text-white rounded-full w-4 h-4 flex items-center justify-center italic">i</span>
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session()->has('error'))
+                    <div class="flex items-center p-4 bg-red-50 border border-red-100 rounded-lg text-red-800 text-[10px] font-bold uppercase tracking-widest mb-8 shadow-sm">
+                        <span class="mr-3 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-bold">!</span>
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 @yield('content')
-                {{-- support rendering slot when using <x-app-layout> component --}}
                 {{ $slot ?? '' }}
             </div>
         </div>
-
     </main>
 
     <footer class="bg-white border-t border-gray-200 py-4 px-8 flex justify-between items-center">

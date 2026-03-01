@@ -43,43 +43,46 @@
                 </div>
             </div>
 
-            <!-- <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/30 flex justify-between items-center">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400">Sécurité du nœud</h3>
-                    <span class="text-[9px] text-emerald-500 font-bold uppercase italic tracking-widest">Protégé par Hash::make</span>
+            @php $coloc = auth()->user()->activeColocation(); @endphp
+            <div class="bg-white border {{ $coloc ? 'border-red-100' : 'border-gray-200' }} rounded-xl overflow-hidden shadow-sm">
+                <div class="px-6 py-4 border-b {{ $coloc ? 'border-red-50 bg-red-50/10' : 'border-gray-50 bg-gray-50/30' }} flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase tracking-widest {{ $coloc ? 'text-red-400' : 'text-gray-400' }}">
+                        {{ $coloc ? 'Zone de Danger' : 'Statut du Canal' }}
+                    </h3>
+                    <span class="text-[9px] font-bold uppercase italic tracking-widest {{ $coloc ? 'text-red-400' : 'text-emerald-500' }}">
+                        {{ $coloc ? 'Action Irréversible' : 'Nœud Isolé' }}
+                    </span>
                 </div>
+
                 <div class="p-8 flex items-center justify-between">
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-gray-800 uppercase tracking-tight">Mot de passe</p>
-                        <p class="text-[10px] text-gray-400 italic">Dernière modification : {{ auth()->user()->updated_at->diffForHumans() }}</p>
-                    </div>
-                    <button class="text-[10px] font-bold uppercase tracking-widest text-gray-400 border border-gray-200 px-6 py-2 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-all">
-                        Réinitialiser
-                    </button>
+                    @if($coloc)
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-800 uppercase tracking-tight">Quitter le canal actif</p>
+                            <p class="text-[10px] text-gray-400 leading-relaxed">
+                                Vous perdrez l'accès à l'historique de : <span class="font-bold text-gray-600">{{ $coloc->name }}</span>
+                            </p>
+                        </div>
+                        
+                        <form action="{{ route('memberships.leave', $coloc->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir quitter cette colocation ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-[10px] font-bold uppercase tracking-widest text-red-500 border border-red-200 px-6 py-2 rounded-lg hover:bg-red-50 transition-all">
+                                Quitter la coloc
+                            </button>
+                        </form>
+                    @else
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-gray-800 uppercase tracking-tight">Aucune colocation active</p>
+                            <p class="text-[10px] text-gray-400 leading-relaxed">
+                                Vous n'êtes actuellement rattaché à aucun canal de dépense.
+                            </p>
+                        </div>
+                        <a href="{{ route('colocation.create') }}" class="text-[10px] font-bold uppercase tracking-widest text-emerald-500 border border-emerald-100 px-6 py-2 rounded-lg hover:bg-emerald-50 transition-all">
+                            Créer ou Rejoindre
+                        </a>
+                    @endif
                 </div>
-            </div> -->
-            <div class="bg-white border border-red-100 rounded-xl overflow-hidden shadow-sm">
-    <div class="px-6 py-4 border-b border-red-50 bg-red-50/10 flex justify-between items-center">
-        <h3 class="text-xs font-bold uppercase tracking-widest text-red-400">Zone de Danger</h3>
-        <span class="text-[9px] text-red-400 font-bold uppercase italic tracking-widest">Action Irréversible</span>
-    </div>
-    <div class="p-8 flex items-center justify-between">
-        <div class="space-y-1">
-            <p class="text-xs font-bold text-gray-800 uppercase tracking-tight">Quitter le canal actif</p>
-            <p class="text-[10px] text-gray-400 leading-relaxed">
-                Vous perdrez l'accès à l'historique de : <span class="font-bold">{{ auth()->user()->activeColocation()->name }}</span>
-            </p>
-        </div>
-        
-        <form action="{{ route('memberships.leave', auth()->user()->activeColocation()->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir quitter cette colocation ?');">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="text-[10px] font-bold uppercase tracking-widest text-red-500 border border-red-200 px-6 py-2 rounded-lg hover:bg-red-50 transition-all">
-                Quitter la coloc
-            </button>
-        </form>
-    </div>
-</div>
+            </div>
         </div>
 
         <div class="space-y-8">
@@ -89,26 +92,31 @@
                     <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400">Indice de Fiabilité</h3>
                 </div>
                 <div class="p-8 flex flex-col items-center">
+                    @php $reputation = $coloc ? ($coloc->pivot->reputation ?? 0) : 0; @endphp
                     <div class="relative flex items-center justify-center">
                         <svg class="w-28 h-28 transform -rotate-90">
                             <circle cx="56" cy="56" r="48" stroke="currentColor" stroke-width="6" fill="transparent" class="text-gray-100" />
                             <circle cx="56" cy="56" r="48" stroke="currentColor" stroke-width="6" fill="transparent" 
                                 stroke-dasharray="301.6" 
-                                stroke-dashoffset="{{ 301.6 - (301.6 * (auth()->user()->activeColocation()->pivot->reputation ?? 0) / 100) }}" 
+                                stroke-dashoffset="{{ 301.6 - (301.6 * $reputation / 100) }}" 
                                 class="text-emerald-500 transition-all duration-1000 ease-out" />
                         </svg>
                         <div class="absolute flex flex-col items-center">
-                            <span class="text-3xl font-black text-gray-900">{{ auth()->user()->activeColocation()->pivot->reputation ?? 0 }}</span>
-                            <span class="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em]">Score %</span>
+                            <span class="text-3xl font-black text-gray-900">{{ $reputation }}</span>
+                            <span class="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em]">Score</span>
                         </div>
                     </div>
 
                     <div class="mt-8 text-center">
-                        <p class="text-[10px] font-bold uppercase tracking-widest {{ (auth()->user()->activeColocation()->pivot->reputation ?? 0) >= 80 ? 'text-emerald-500' : 'text-amber-500' }}">
-                            {{ (auth()->user()->activeColocation()->pivot->reputation ?? 0) >= 80 ? 'Excellent Opérateur' : 'Profil à surveiller' }}
+                        <p class="text-[10px] font-bold uppercase tracking-widest {{ $reputation >= 80 ? 'text-emerald-500' : ($coloc ? 'text-amber-500' : 'text-gray-300') }}">
+                            @if(!$coloc)
+                                Hors Réseau
+                            @else
+                                {{ $reputation >= 80 ? 'Excellent Opérateur' : 'Profil à surveiller' }}
+                            @endif
                         </p>
                         <p class="text-[9px] text-gray-400 mt-2 leading-relaxed italic px-2">
-                            Mise à jour synchronisée avec vos transactions financières actives.
+                            {{ $coloc ? 'Mise à jour synchronisée avec vos transactions.' : 'Rejoignez une coloc pour activer votre indice.' }}
                         </p>
                     </div>
                 </div>

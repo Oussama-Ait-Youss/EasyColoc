@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\User;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
@@ -26,18 +27,30 @@ class ProfileController extends Controller
     }
 
     
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
+    public function updateReputation(Request $request, User $user, string $action): RedirectResponse
+{
+    $currentUser = Auth::user();
+    $colocation = $currentUser->activeColocation();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    if ($currentUser->id === $user->id) {
+        return back()->with('error', 'Auto-évaluation interdite par le protocole.');
     }
+
+    $membership = $user->colocations()
+        ->where('colocation_id', $colocation->id)
+        ->first()
+        ->pivot;
+
+    $currentScore = $membership->reputation ?? 0;
+    $adjustment = ($action === 'up') ? 1 : -1;
+    $newScore = max(0, min(100, $currentScore + $adjustment));
+
+    $user->colocations()->updateExistingPivot($colocation->id, [
+        'reputation' => $newScore
+    ]);
+
+    return back()->with('success', 'Indice de fiabilité mis à jour.');
+}
 
     
     public function destroy(Request $request): RedirectResponse
