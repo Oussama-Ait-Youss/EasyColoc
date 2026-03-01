@@ -13,12 +13,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="flex items-center p-4 bg-emerald-50 border border-emerald-100 rounded-lg text-emerald-800 text-[10px] font-bold uppercase tracking-widest">
-            <span class="mr-3 bg-emerald-500 text-white rounded-full w-4 h-4 flex items-center justify-center italic">i</span>
-            {{ session('success') }}
-        </div>
-    @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         

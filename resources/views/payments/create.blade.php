@@ -54,7 +54,7 @@
                 </a>
                 <button type="submit" 
                     class="bg-gray-900 text-white px-10 py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-gray-200">
-                    Confirmer la réception
+                    Marque paye
                 </button>
             </div>
         </form>

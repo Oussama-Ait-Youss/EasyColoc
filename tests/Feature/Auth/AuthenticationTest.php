@@ -42,6 +42,21 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_banned_users_cannot_authenticate(): void
+    {
+        $user = User::factory()->create(['is_banned' => true]);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $this->assertTrue(session()->has('errors'));
+        $errors = session('errors')->getBag('default')->all();
+        $this->assertStringContainsString('banned', implode(' ', $errors));
+    }
+
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
