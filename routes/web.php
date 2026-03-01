@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ExpensesController;
@@ -30,6 +31,10 @@ Route::middleware('auth')->group(function () {
     return view('profile.show');
     
 })->middleware(['auth'])->name('profile.show');
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::post('/admin/users/{user}/ban', [AdminController::class, 'toggleBan'])->name('admin.users.ban');
+});
     Route::delete('/memberships/leave/{colocation}', [MembershipsController::class, 'leave'])->name('memberships.leave');
     // --- Colocations ---
     Route::get('/colocations', [ColocationController::class, 'index'])->name('colocation.index');
@@ -54,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/expenses/{expense}/edit', [ExpensesController::class, 'edit'])->name('expenses.edit');
     Route::put('/expenses/{expense}', [ExpensesController::class, 'update'])->name('expenses.update');
     Route::delete('/expenses/{expense}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
+    Route::post('/expenses/{expense}/pay', [ExpensesController::class, 'pay'])->name('expenses.pay');
 
     // --- Invitations ---
     Route::get('/invitations', [InvitationsController::class, 'index'])->name('invitations.index');

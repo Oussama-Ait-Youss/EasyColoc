@@ -9,35 +9,46 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreExpenseRequest;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-// use Illuminate\Support\Facades\Auth;
+use App\Models\Payments;
 
 class ExpensesController extends Controller
 {
     
     public function index()
     {
-        //
-        $expenses = Expenses::all();
         
-        return view('expenses.index',compact('expenses'));
+        $user = Auth::user();
+
+        $colocation = $user ? $user->activeColocation() : null;
+
+        if ($colocation) {
+            $expenses = Expenses::where('colocation_id', $colocation->id)
+                ->with(['user', 'category'])
+                ->orderBy('date', 'desc')
+                ->get();
+        } else {
+        
+            $expenses = collect();
+        }
+
+        return view('expenses.index', compact('expenses'));
     }
 
    
     public function create()
 {
-    // 1. On récupère la colocation active de l'utilisateur connecté
+    
     $colocation = Auth::user()->activeColocation();
 
-    // 2. PROTECTION : Si l'utilisateur n'a pas de colocation, on ne va pas plus loin
+    
     if (!$colocation) {
         return redirect()->route('colocation.create')
             ->with('error', 'Vous devez rejoindre une colocation pour ajouter des dépenses.');
     }
 
-    // 3. Ici, on est sûr que $colocation n'est pas NULL
     $categories = Categories::where('colocation_id', $colocation->id)->get();
 
-    // If there are no categories yet, create a set of sensible defaults
+    
     if ($categories->isEmpty()) {
         $defaultCategories = [
             'Rent' => 'Monthly rent payments',
@@ -57,7 +68,6 @@ class ExpensesController extends Controller
             ]);
         }
 
-        // reload categories after creating defaults
         $categories = Categories::where('colocation_id', $colocation->id)->get();
     }
     
@@ -67,40 +77,53 @@ class ExpensesController extends Controller
   
     public function store(StoreExpenseRequest $request)
     {
-        //
+       
+        $colocation = Auth::user() ? Auth::user()->activeColocation() : null;
+
+        if (!$colocation) {
+            return redirect()->route('colocation.create')
+                ->with('error', "Vous devez rejoindre une colocation pour ajouter des dépenses.");
+        }
+
         Expenses::create([
             'title'         => $request->title,
             'amount'        => $request->amount,
             'category_id'   => $request->category_id,
             'date'          => $request->date,
-            'colocation_id' => $request->colocation_id,
+            'colocation_id' => $colocation->id,
             'user_id'       => Auth::id(),
         ]);
-        // return view('colocation.index');
         return redirect()->route('expenses.index')->with('success','ajouter expenses avec success');
 
     }
 
-    /**
-     * Display the specified resource.
-     */
+  
     public function show(Expenses $expenses)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+  
     public function edit(string $id)
     {
+        $colocation = Auth::user()->activeColocation();
+        if (!$colocation) {
+            return redirect()->route('colocation.create')
+                ->with('error', 'Vous devez rejoindre une colocation.');
+        }
+
         $expenses = Expenses::findOrFail($id);
-        return view('expenses.edit',compact('expenses'));
+        
+        // Verify expense belongs to current colocation
+        if ((int)$expenses->colocation_id !== (int)$colocation->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $categories = Categories::where('colocation_id', $colocation->id)->get();
+        return view('expenses.edit',compact('expenses','categories'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(StoreExpenseRequest $request, Expenses $expenses)
     {
         $expenses->update([
@@ -113,12 +136,60 @@ class ExpensesController extends Controller
         return redirect()->route('expenses.index')->with('success','expenses modifier avec success');
     }
 
+    public function destroy(Expenses $expenses) 
+{
+    $user = Auth::user();
+    $colocation = $user->activeColocation();
+
+    if (!$colocation) {
+        return redirect()->route('colocation.create')
+            ->with('error', 'Vous devez rejoindre une colocation.');
+    }
+
+    
+    if ((int)$expenses->colocation_id !== (int)$colocation->id) {
+        abort(403, 'Unauthorized action. Cette dépense n\'appartient pas à votre colocation.');
+    }
+
+    $expenses->delete();
+    
+    return redirect()->route('expenses.index')->with('success', 'Dépense supprimée avec succès');
+}
+
     /**
-     * Remove the specified resource from storage.
+     * Mark a specific expense as paid by the current user (creates a Payments record).
      */
-    public function destroy(Expenses $expenses)
+    public function pay(Expenses $expense)
     {
-        $expenses->delete();
-        return redirect()->route('expenses.index')->with('success','supprimere avec success');
+        $user = Auth::user();
+        $colocation = $user ? $user->activeColocation() : null;
+
+        if (!$colocation) {
+            return redirect()->route('colocation.create')
+                ->with('error', 'Vous devez appartenir à une colocation.');
+        }
+
+        if ((int)$expense->colocation_id !== (int)$colocation->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Prevent paying your own expense
+        if ((int)$expense->user_id === (int)$user->id) {
+            return redirect()->route('expenses.index')->with('error', 'Vous ne pouvez pas vous payer vous-même.');
+        }
+
+        // Determine share: split evenly among active members
+        $memberCount = $colocation->users()->wherePivot('left_at', null)->count() ?: 1;
+        $share = round($expense->amount / $memberCount, 2);
+
+        Payments::create([
+            'amount' => $share,
+            'from_user_id' => $user->id,
+            'to_user_id' => $expense->user_id,
+            'colocation_id' => $colocation->id,
+            'paid_at' => now(),
+        ]);
+
+        return redirect()->route('expenses.index')->with('success', 'Paiement enregistré.');
     }
 }
